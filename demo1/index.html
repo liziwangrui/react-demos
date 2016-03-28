@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../build/react.js"></script>
+    <script src="../build/react-dom.js"></script>
+    <script src="../build/JSXTransformer.js"></script>
+    <script src="../build/browser.min.js"></script>
+</head>
+<body>
+    <div id="MOuntNode"></div>
+    <script type="text/jsx">
+        var HelloMessage = React.createClass({
+            render: function(){
+                return (
+                        <div> hello {this.props.name}</div>
+                );
+            }
+        });
+        React.render(
+            <HelloMessage name="saly"/>,
+                MOuntNode
+        );
+    </script>
+</body>
+</html>
