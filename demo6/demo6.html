@@ -1,0 +1,206 @@
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>React TODO List</title>
+    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css" type="text/css"/>
+</head>
+<body>
+<h1><u>React-Todos</u></h1>
+<div id="app">
+    <!--
+      this -- _self
+    -->
+</div>
+
+<style type="text/css">
+    body {
+        width:100%;
+        height:100%;
+        margin:0;
+        padding:0;
+        background:#f0f0f0;
+        position:relative;
+    }
+    h1 {
+        margin:20px auto 10px;
+        text-align:center;
+    }
+    #app {
+        background:#f0f0f0;
+        width:760px;
+        height:200px;
+        position:absolute;
+        top:50%;
+        left:50%;
+        margin-top:-100px;
+        margin-left:-380px;
+    }
+    .panel .glyphicon{margin-right:20px;}
+    .panel .panel-heading {border-bottom:2px solid #ddd;}
+    .panel .panel-title {
+        border:transparent;
+        outline:none;
+        width:90%;
+    }
+    li {
+        list-style: none;
+        margin-top:15px;
+        border-bottom:1px solid #ddd;
+        padding-bottom:8px;
+    }
+    li:last-child{
+        border-bottom:none;
+    }
+    li:hover{cursor:pointer;}
+    input[type='checkbox'] {margin-right:10px;}
+    .glyphicon-plus-sign:hover{cursor:pointer}
+</style>
+<script src="../build/jquery.min.js"></script>
+<script src="../build/bootstrap.min.js"></script>
+<script src="../build/react.js"></script>
+<script src="../build/react-dom.js"></script>
+<script src="../build/JSXTransformer.js"></script>
+<script src="../build/browser.min.js"></script>
+
+<script type="text/jsx">
+    var TodoApp = React.createClass({
+        getInitialState:function(){
+            return{
+                todolists:['11','22','33'],
+                inputValue:'',
+                listCount:3,
+                finishCount:0,
+            }
+        },
+
+//    获取填写的任务
+        handleText:function(e){
+            this.setState({
+                inputValue: e.target.value
+            })
+        },
+//    添加任务
+        handleAdd:function(){
+            if(this.state.inputValue != ''){
+                var nextTask = this.state.todolists.concat(this.state.inputValue);
+                this.setState({
+                    todolists:nextTask,
+                    inputValue:'',
+                    listCount:this.state.listCount + 1
+                })
+            }else{
+                return false;
+            }
+        },
+//    删除单个任务，传递给SubList组件的方法
+        delCallback: function(index) {
+//      此处有魔法
+            var lists = JSON.parse(JSON.stringify(this.state.todolists));
+            lists.splice(index, 1);
+            this.setState({
+                todolists: lists,
+                listCount:this.state.listCount - 1,
+            });
+        },
+//    计算已完成数，传递给SubList组件的方法
+        handleCountFinish:function(bool){
+            if(bool){
+                this.setState({
+                    finishCount:this.state.finishCount + 1,
+                });
+            }else{
+                this.setState({
+                    finishCount:this.state.finishCount - 1,
+                })
+            }
+        },
+
+        render:function(){
+            return(
+                    <div className="panel">
+                        <div className="panel-heading">
+                            <span className="glyphicon glyphicon-plus-sign" onClick={this.handleAdd}></span>
+                            <input className="panel-title" placeholder="what's your task?" value={this.state.inputValue} onChange={this.handleText}/>
+                        </div>
+                        <ListBox todos={this.state.todolists} delCallback={this.delCallback}
+                                 totalCount={this.state.listCount} finishCoun={this.state.finishCount}
+                                 finishTask={this.handleCountFinish}/>
+                    </div>
+            )
+        }
+    });
+
+    var ListBox = React.createClass({
+
+        render:function(){
+            var _self = this;
+            var msgs=[];
+            this.props.todos.forEach(function(msg,index){
+                msgs.push(
+                        <SubList tasks={msg} tasksIndex={index} callback={_self.props.delCallback}
+                                 addCount={_self.props.addList} countFinishTask={_self.props.finishTask}/>
+                )
+            });
+            return(
+                    <div className="panel-body">
+                        <ul>
+                            {msgs}
+                            <li>
+                                <input type="checkbox" name="goodCheck"/>
+                                <label>{this.props.finishCoun}已完成/{this.props.totalCount}总数</label>
+                                <button className="btn btn-xs btn-default pull-right delBtn">清除已完成</button>
+                            </li>
+                        </ul>
+                    </div>
+            );
+        }
+    });
+
+    var SubList = React.createClass({
+        getInitialState:function(){
+            return {
+                delDecoration:true,
+            }
+        },
+
+        handlerMouseOut:function(){
+            this.refs.delBtn.style.display = "none";
+        },
+        handlerMouseOver:function(){
+            this.refs.delBtn.style.display = "inline";
+        },
+        handleRemove:function(e){
+            var _self = this;
+            var delIndex = e.target.getAttribute('data-key');
+            _self.props.callback(delIndex);
+        },
+        handleCheck:function(e){
+            var _self = this;
+            _self.setState({
+                delDecoration:!_self.state.delDecoration,
+            });
+            _self.refs.conLabel.style.textDecoration = _self.state.delDecoration?'line-through':'none';
+            var boolDecoration = _self.state.delDecoration;
+            _self.props.countFinishTask(boolDecoration);
+        },
+
+        render:function(){
+            var _self = this;
+            return (
+                    <li onMouseOver={_self.handlerMouseOver} onMouseOut={_self.handlerMouseOut}>
+                        <input type="checkbox" name="goodCheck" onChange={_self.handleCheck} data-val={this.props.tasksIndex}/>
+                        <label ref="conLabel">{this.props.tasks}</label>
+                        <button className="btn btn-xs btn-default pull-right delBtn" ref="delBtn"
+                                style={{'display':'none'}} onClick={_self.handleRemove} data-key={this.props.tasksIndex}>delete</button>
+                    </li>
+            )
+        }
+    });
+
+    var TODOS = ReactDOM.render(
+            <TodoApp />,
+            document.getElementById('app')
+    );
+</script>
+</body>
+</html>
