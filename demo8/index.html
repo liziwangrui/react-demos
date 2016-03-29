@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="../build/react.js"></script>
+    <script src="../build/react-dom.js"></script>
+    <script src="../build/JSXTransformer.js"></script>
+    <script src="../build/browser.min.js"></script>
+</head>
+<body>
+<div id="App"></div>
+<script type="text/jsx">
+    var MessageBox = React.createClass({
+        render: function(){
+            var SumMessages = [];
+            for(i=0;i<=10;i++){
+                SumMessages.push(
+                        <SubMessage key={'submsg'+i}/>
+                )
+            }
+            return (
+                    <div>
+                        <h1>你好  春天</h1>
+                        {SumMessages}
+                    </div>
+
+            )
+        }
+    });
+    var SubMessage = React.createClass({
+        render:function (){
+            return (
+                    <div>
+                        <h3>学react越来越有意思</h3>
+                        <Footer/>
+                    </div>
+
+            )
+        }
+    });
+    var Footer = React.createClass({
+        render: function(){
+            return (
+                    <small>第一次学习加油</small>
+            )
+        }
+    });
+    React.render(<MessageBox/>,
+            document.getElementById('App'),
+            function(){
+                console.log("渲染完成了");
+            }
+    )
+</script>
+</body>
+</html>
